@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   
   <title>Toko Parfum & Kosmetik — Mall Display</title>
-  <meta name="description" content="Display toko parfum & kosmetik modern, intuitif, interaktif — warna cream, putih, dan marun." />
+  <meta name="description" content="display toko kue yang aestetic dan unik — warna biru, dan putih." />
   <style>
     :root{
-      --cream: #FFF6EA; /* warm cream */
+      --blue: #FFF6EA; /* warm blue */
       --white: #FFFFFF;
       --maroon: #6e0f17; /* marun */
       --muted: #7b7b7b;
@@ -121,15 +121,15 @@
       <div class="brand">
         <div class="logo">TP</div>
         <div>
-          <h1>Toko Parfum & Kosmetik — Mall Display</h1>
-          <p class="lead">Koleksi parfum & kosmetik pilihan — desain ramah pengunjung, modern & intuitif</p>
+          <h1>Toko kue aesthetic dan unik —store Display</h1>
+          <p class="lead">Koleksi kue yang enak dan lezat — desain ramah pengunjung, modern & intuitif</p>
         </div>
       </div>
 
       <div class="controls">
         <div class="search" role="search">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M21 21l-4.35-4.35" stroke="#c1c1c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="11" cy="11" r="6" stroke="#c1c1c1" stroke-width="2"></circle></svg>
-          <input id="searchInput" placeholder="Cari parfum atau kosmetik..." aria-label="Cari produk" />
+          <input id="searchInput" placeholder="Cari kue yang enak dan lezat..." aria-label="Cari produk" />
           <div class="chip" id="sortBtn" title="Urutkan">Urutkan ▾</div>
         </div>
         <div class="chip" id="viewToggle" title="Ubah tampilan">Tampilan Grid</div>
@@ -138,8 +138,8 @@
 
     <nav class="category-bar" aria-label="Kategori">
       <button class="category active" data-cat="all">Semua</button>
-      <button class="category" data-cat="parfum">Parfum</button>
-      <button class="category" data-cat="kosmetik">Kosmetik</button>
+      <button class="category" data-cat="kue">kue</button>
+      <button class="category" data-cat="kue">kue</button>
       <button class="category" data-cat="best">Best Seller</button>
     </nav>
 
@@ -159,7 +159,7 @@
         <h2 id="modalTitle">Nama Produk</h2>
         <p id="modalTagline" style="color:var(--muted)">Tagline singkat produk</p>
         <div style="margin-top:10px"><span style="font-size:20px;font-weight:800;color:var(--maroon)" id="modalPrice">Rp 0</span></div>
-        <div style="margin-top:12px" id="modalDescription">Deskripsi produk singkat yang menjelaskan aroma, bahan, dan keunggulan.</div>
+        <div style="margin-top:12px" id="modalDescription">Deskripsi produk singkat yang menjelaskan bahan, dan rasa.</div>
 
         <div style="margin-top:18px" class="badges">
           <div class="badge">Demo Tester</div>
@@ -177,12 +177,12 @@
   <script>
     // Sample product data (replace with real data from backend)
     const products = [
-      {id:1,name:'Aurora Floral Eau de Parfum',category:'parfum',price:499000,tagline:'Aroma bunga malam yang elegan',img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=60',desc:'Notes: rose, jasmine, sandalwood. Cocok untuk acara spesial.'},
-      {id:2,name:'Silk Velvet Lipstick - Ruby',category:'kosmetik',price:129000,tagline:'Warni tahan lama',img:'https://images.unsplash.com/photo-1585238342027-3a4b4c98a6e6?auto=format&fit=crop&w=800&q=60',desc:'Finishing velvet, nyaman dan tidak kering.'},
-      {id:3,name:'Citrus Breeze Perfume',category:'parfum',price:349000,tagline:'Segar & energik',img:'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=60',desc:'Notes: bergamot, mandarin, musk. Harian yang ringan.'},
-      {id:4,name:'Glow Dew Highlighter',category:'kosmetik',price:99000,tagline:'Kilau natural',img:'https://images.unsplash.com/photo-1543353071-087092ec393a?auto=format&fit=crop&w=800&q=60',desc:'Memberi tampilan glowing sehat pada kulit.'},
-      {id:5,name:'Midnight Oud Limited',category:'parfum',price:799000,tagline:'Mewah & memikat',img:'https://images.unsplash.com/photo-1579932918882-9f274c1f80c6?auto=format&fit=crop&w=800&q=60',desc:'Oud murni berpadu rempah hangat.'},
-      {id:6,name:'Allure Mascara',category:'kosmetik',price:89000,tagline:'Bulu mata dramatis',img:'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=800&q=60',desc:'Volumizing tanpa menggumpal.'}
+      {id:1,name:'cake double chocolate',category:'kue',price:499000,tagline:'rasa coklat yang pas di mulut',img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=60',desc:'Notes: rose, jasmine, sandalwood. Cocok untuk acara spesial.'},
+      {id:2,name:'rainbow cake - Ruby',category:'kue',price:129000,tagline:'warna warni yang melezatkan',img:'https://images.unsplash.com/photo-1585238342027-3a4b4c98a6e6?auto=format&fit=crop&w=800&q=60',desc:'Finishing velvet, nyaman dan tidak kering.'},
+      {id:3,name:'macaron',category:'cake',price:349000,tagline:'manis',img:'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=800&q=60',desc:'Notes: bergamot, mandarin, musk. Harian yang ringan.'},
+      {id:4,name:'blueberry cheseecake',category:'kue',price:99000,tagline:'cheseecake yang menggoda',img:'https://images.unsplash.com/photo-1543353071-087092ec393a?auto=format&fit=crop&w=800&q=60',desc:'Memberi tampilan glowing sehat pada kulit.'},
+      {id:5,name:'cheseecake custom',category:'parfum',price:799000,tagline:'enak',img:'https://images.unsplash.com/photo-1579932918882-9f274c1f80c6?auto=format&fit=crop&w=800&q=60',desc:'Oud murni berpadu rempah hangat.'},
+      {id:6,name:'double chocolate slice',category:'enak dan manis',price:89000,tagline:'kecil dan enak',img:'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=800&q=60',desc:'Volumizing tanpa menggumpal.'}
     ];
 
     const grid = document.getElementById('productGrid');
