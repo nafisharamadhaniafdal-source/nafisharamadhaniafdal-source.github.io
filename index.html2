@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SweetBlue – Toko Kue</title>
+  <meta name="description" content="Toko kue modern bertema biru & putih. Pesan kue ulang tahun, kue kering, dan pastry dengan mudah." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Ccircle cx='128' cy='128' r='120' fill='%230a63c7'/%3E%3Cpath d='M64 160h128a40 40 0 0 1-40 32H104a40 40 0 0 1-40-32Z' fill='%23fff'/%3E%3Ccircle cx='92' cy='140' r='10' fill='%23fff'/%3E%3Ccircle cx='128' cy='132' r='10' fill='%23fff'/%3E%3Ccircle cx='164' cy='140' r='10' fill='%23fff'/%3E%3C/svg%3E"/>
+  <style>
+    :root{
+      --blue-900:#0a2e5c; --blue-700:#0f4faa; --blue-600:#0a63c7; --blue-500:#1a78e6; --blue-100:#e8f2ff;
+      --ink:#0f172a; --muted:#475569; --bg:#ffffff; --card:#ffffff; --ring:#cfe1ff; --shadow:0 10px 30px rgba(10,99,199,.15);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{max-width:1100px;margin-inline:auto;padding:0 20px}
+    /* Header */
+    header{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.8);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid #eef3ff}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
+    .logo{width:36px;height:36px;background:linear-gradient(135deg,var(--blue-600),var(--blue-500));border-radius:12px;box-shadow:var(--shadow);position:relative}
+    .logo:after{content:"";position:absolute;inset:6px;border-radius:9px;background:radial-gradient(circle at 30% 20%,#fff7,transparent 60%)}
+    .nav a{padding:10px 14px;border-radius:12px}
+    .nav a:hover{background:var(--blue-100)}
+    .cta{background:var(--blue-600);color:#fff;border:none;padding:10px 16px;border-radius:14px;box-shadow:var(--shadow);cursor:pointer;font-weight:700}
+    .cta:hover{transform:translateY(-1px)}
+
+    /* Hero */
+    .hero{position:relative;overflow:hidden}
+    .hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:36px;align-items:center;padding:72px 0}
+    .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--ring);color:var(--blue-700);background:#fff;border-radius:999px;padding:6px 12px;font-weight:700}
+    h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin:14px 0}
+    .lead{color:var(--muted);max-width:60ch}
+    .hero-card{background:linear-gradient(180deg,#fff, #f7fbff);border:1px solid #e7f0ff;border-radius:24px;padding:20px;box-shadow:var(--shadow)}
+    .hero-badge{display:flex;gap:10px;align-items:center;margin-top:14px;color:var(--blue-700)}
+
+    /* Features grid */
+    .grid{display:grid;gap:18px;grid-template-columns:repeat(3,1fr);margin:34px 0}
+    .card{background:var(--card);border:1px solid #edf3ff;border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    .card h3{margin:6px 0 8px}
+
+    /* Products */
+    .section{padding:56px 0}
+    .section h2{font-size:clamp(22px,3vw,32px);margin:0 0 12px}
+    .muted{color:var(--muted)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 14px}
+    .chip{border:1px solid var(--ring);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
+    .chip.active{background:var(--blue-600);color:#fff;border-color:transparent}
+    .products{display:grid;gap:18px;grid-template-columns:repeat(4,1fr)}
+    .prod{background:#fff;border:1px solid #edf3ff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
+    .prod .thumb{aspect-ratio:4/3;background:linear-gradient(135deg,#f8fbff,#e9f2ff);display:grid;place-items:center;position:relative}
+    .sprinkles{position:absolute;inset:0;background:radial-gradient(2px 2px at 20% 30%, var(--blue-600) 40%, transparent 45%),
+      radial-gradient(2px 2px at 70% 60%, #1a78e6 40%, transparent 45%),
+      radial-gradient(2px 2px at 45% 80%, #0a63c7 40%, transparent 45%);
+      opacity:.15}
+    .prod h4{margin:12px 12px 6px}
+    .price{margin:0 12px 12px;font-weight:800;color:var(--blue-700)}
+    .actions{display:flex;gap:10px;align-items:center;margin:0 12px 14px}
+    .btn{flex:1;border:1px solid var(--ring);background:#fff;border-radius:12px;padding:10px;cursor:pointer}
+    .btn.primary{background:var(--blue-600);border-color:transparent;color:#fff;font-weight:700}
+
+    /* Promo band */
+    .band{background:linear-gradient(90deg,var(--blue-600),var(--blue-500));color:#fff;border-radius:22px;padding:18px;display:flex;gap:16px;align-items:center;justify-content:center;margin:28px 0;box-shadow:var(--shadow)}
+
+    /* Testimonials & About */
+    .cols{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}
+    blockquote{background:#fff;border-left:6px solid var(--blue-600);border-radius:0 16px 16px 0;padding:16px;box-shadow:var(--shadow);margin:0}
+    blockquote footer{color:var(--muted);margin-top:8px;font-size:.95rem}
+    .about{background:#fff;border:1px solid #edf3ff;border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+
+    /* Gallery */
+    .gallery{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+    .tile{border-radius:18px;overflow:hidden;position:relative}
+    .tile:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent,rgba(0,0,0,.04))}
+
+    /* Contact */
+    form{display:grid;gap:12px}
+    input,textarea,select{width:100%;padding:12px 14px;border:1px solid var(--ring);border-radius:12px;background:#fff}
+    label{font-weight:600}
+    .submit{background:var(--blue-600);color:#fff;border:none;padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:800}
+
+    /* Footer */
+    footer{margin-top:40px;border-top:1px solid #eef3ff;padding:26px 0;color:var(--muted)}
+
+    /* Badges */
+    .badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-100);color:var(--blue-700);padding:6px 10px;border-radius:999px;font-weight:700}
+
+    /* Modal */
+    dialog{border:none;border-radius:20px;max-width:760px;width:92%;box-shadow:var(--shadow)}
+    dialog::backdrop{background:rgba(10,22,40,.6)}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .hero .wrap{grid-template-columns:1fr}
+      .grid{grid-template-columns:1fr 1fr}
+      .products{grid-template-columns:repeat(2,1fr)}
+      .cols{grid-template-columns:1fr}
+    }
+    @media (max-width: 560px){
+      .grid{grid-template-columns:1fr}
+      .products{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container nav">
+      <div class="brand" aria-label="SweetBlue Toko Kue">
+        <span class="logo" aria-hidden="true"></span>
+        <span>Sweet<span style="color:var(--blue-600)">Blue</span></span>
+      </div>
+      <nav aria-label="Navigasi utama">
+        <a href="#produk">Produk</a>
+        <a href="#tentang">Tentang</a>
+        <a href="#kontak">Kontak</a>
+        <button class="cta" id="cartButton" aria-label="Buka keranjang">Keranjang • <span id="cartCount">0</span></button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container wrap">
+      <div>
+        <span class="pill" aria-label="Fresh baked daily">🍰 Fresh baked • Halal</span>
+        <h1>Kue manis, desain elegan, <span style="color:var(--blue-600)">siap memeriahkan</span> momen spesialmu</h1>
+        <p class="lead">Dari kue ulang tahun bertingkat hingga pastry renyah—semua dibuat dari bahan premium. Pesan online, ambil di toko, atau nikmati layanan antar.</p>
+        <div class="hero-badge">
+          <span class="badge">⭐ 4.9/5 ulasan</span>
+          <span class="badge">🚚 Antar 1–2 jam</span>
+          <span class="badge">🎂 Custom cake</span>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <a href="#produk" class="cta" aria-label="Lihat produk">Lihat Produk</a>
+          <button class="btn" onclick="openPromo()">Lihat Promo</button>
+        </div>
+      </div>
+      <div class="hero-card" role="img" aria-label="Tampilan kue signature SweetBlue">
+        <img alt="Kue krim biru putih" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='420'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23e8f2ff'/%3E%3Cstop offset='1' stop-color='%23ffffff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23g)'/%3E%3Cellipse cx='320' cy='240' rx='220' ry='120' fill='%23e4efff'/%3E%3Cellipse cx='320' cy='210' rx='200' ry='100' fill='%23ffffff' stroke='%23d4e6ff'/%3E%3Ccircle cx='220' cy='170' r='14' fill='%230a63c7'/%3E%3Ccircle cx='260' cy='160' r='10' fill='%231a78e6'/%3E%3Ccircle cx='400' cy='175' r='10' fill='%230a63c7'/%3E%3C/ svg%3E" />
+        <p class="muted" style="margin-top:10px">Signature cake: Vanilla Cloud dengan frosting biru-cream.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature grid -->
+  <div class="container">
+    <div class="grid" role="list" aria-label="Keunggulan SweetBlue">
+      <div class="card" role="listitem">
+        <h3>✅ Bahan Premium</h3>
+        <p class="muted">Butter asli, cokelat Belgia, tanpa pengawet. Rasa konsisten setiap gigitan.</p>
+      </div>
+      <div class="card" role="listitem">
+        <h3>🧁 Custom Desain</h3>
+        <p class="muted">Pilih ukuran, warna, dan dekorasi favorit. Kami wujudkan ide kamu.</p>
+      </div>
+      <div class="card" role="listitem">
+        <h3>🚚 Cepat & Aman</h3>
+        <p class="muted">Pengantaran berpendingin agar kue tetap cantik sampai tujuan.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products -->
+  <section id="produk" class="section">
+    <div class="container">
+      <h2>Produk Unggulan</h2>
+      <p class="muted">Filter rasa favoritmu.</p>
+      <div class="toolbar" role="tablist" aria-label="Filter rasa">
+        <button class="chip active" data-filter="all" role="tab" aria-selected="true">Semua</button>
+        <button class="chip" data-filter="cokelat" role="tab">Cokelat</button>
+        <button class="chip" data-filter="vanila" role="tab">Vanila</button>
+        <button class="chip" data-filter="stroberi" role="tab">Stroberi</button>
+        <button class="chip" data-filter="keju" role="tab">Keju</button>
+      </div>
+      <div class="products" id="productGrid">
+        <!-- Product Card Template Instances -->
+      </div>
+      <div class="band" role="note" aria-label="Promo">
+        🎉 Promo Agustus: Potongan 15% untuk pre-order H-3. Gunakan kode <strong>BLUECAKE15</strong> saat checkout.
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials & About -->
+  <section id="tentang" class="section">
+    <div class="container cols">
+      <div>
+        <h2>Apa kata mereka</h2>
+        <blockquote>
+          “Kuenya cantik banget dan rasanya top. Pengiriman rapi, ulang tahun jadi makin spesial!”
+          <footer>— Rani, Jakarta</footer>
+        </blockquote>
+        <blockquote style="margin-top:14px">
+          “Favorit keluarga. Croissant-nya wangi butter, dan signature cake Vanilla Cloud wajib coba.”
+          <footer>— Aldi, Depok</footer>
+        </blockquote>
+      </div>
+      <div class="about">
+        <h2>Tentang SweetBlue</h2>
+        <p class="muted">Sejak 2015, kami memanggang kue dengan standar hotel, harga tetap ramah. Tim pastry kami tersertifikasi dan dapur bersertifikat halal.</p>
+        <ul>
+          <li>📍 Mall Biru Lantai 2, Jakarta</li>
+          <li>🕒 Setiap hari 10.00–21.00 WIB</li>
+          <li>☎️ 0822-0000-0000</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  <section class="section">
+    <div class="container">
+      <h2>Galeri</h2>
+      <div class="gallery">
+        <div class="tile"><img alt="Cake 1" src="https://picsum.photos/seed/cake1/800/600" loading="lazy"></div>
+        <div class="tile"><img alt="Cake 2" src="https://picsum.photos/seed/cake2/600/600" loading="lazy"></div>
+        <div class="tile"><img alt="Cake 3" src="https://picsum.photos/seed/cake3/600/600" loading="lazy"></div>
+        <div class="tile" style="grid-column: span 2"><img alt="Cake 4" src="https://picsum.photos/seed/cake4/1200/600" loading="lazy"></div>
+        <div class="tile"><img alt="Cake 5" src="https://picsum.photos/seed/cake5/600/600" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="kontak" class="section">
+    <div class="container cols">
+      <div>
+        <h2>Hubungi Kami</h2>
+        <p class="muted">Ada pertanyaan? Ingin custom nama di kue? Kirim pesan—kami siap bantu.</p>
+        <form id="contactForm" novalidate>
+          <div>
+            <label for="nama">Nama</label>
+            <input id="nama" name="nama" placeholder="Nama lengkap" required />
+          </div>
+          <div>
+            <label for="wa">Nomor WhatsApp</label>
+            <input id="wa" name="wa" type="tel" placeholder="08xx xxxx xxxx" required />
+          </div>
+          <div>
+            <label for="pesan">Pesan</label>
+            <textarea id="pesan" name="pesan" rows="4" placeholder="Halo, saya ingin pesan kue..." required></textarea>
+          </div>
+          <button class="submit" type="submit">Kirim</button>
+          <p id="formMsg" class="muted" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+      <div class="about">
+        <h2>Lokasi & Jam Buka</h2>
+        <p>SweetBlue Bakery – Mall Biru Lantai 2, Jakarta</p>
+        <p class="muted">Senin–Minggu • 10.00–21.00 WIB</p>
+        <div style="height:240px;border-radius:16px;overflow:hidden;border:1px solid #e8f2ff">
+          <iframe title="Peta lokasi" src="https://maps.google.com/maps?q=jakarta&t=&z=13&ie=UTF8&iwloc=&output=embed" width="100%" height="100%" style="border:0"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <small>© <span id="year"></span> SweetBlue Bakery. All rights reserved.</small>
+      <div style="display:flex;gap:10px;align-items:center">
+        <a href="#" aria-label="Instagram">📷 Instagram</a>
+        <a href="#" aria-label="Tiktok">🎵 TikTok</a>
+        <a href="#" aria-label="WhatsApp">💬 WhatsApp</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Product Quick View Modal -->
+  <dialog id="quickView">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="tile">
+        <img id="qvImg" alt="Produk" src="" />
+      </div>
+      <div>
+        <h3 id="qvTitle">Nama Kue</h3>
+        <p id="qvDesc" class="muted">Deskripsi kue.</p>
+        <p class="price" id="qvPrice">Rp 0</p>
+        <div style="display:flex;gap:10px">
+          <button class="btn" onclick="document.getElementById('quickView').close()">Tutup</button>
+          <button class="btn primary" id="qvAdd">Tambah ke Keranjang</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    // Data produk (contoh)
+    const products = [
+      {id:1,name:"Vanilla Cloud",price:145000,flavor:"vanila",img:"https://picsum.photos/seed/vanilla/600/450",desc:"Sponge vanila lembut dengan frosting krim biru-putih."},
+      {id:2,name:"Choco Velvet",price:165000,flavor:"cokelat",img:"https://picsum.photos/seed/choco/600/450",desc:"Cokelat Belgia legit, ganache halus, taburan cokelat."},
+      {id:3,name:"Strawberry Bliss",price:155000,flavor:"stroberi",img:"https://picsum.photos/seed/strawberry/600/450",desc:"Selai stroberi homemade, sponge vanila, krim ringan."},
+      {id:4,name:"Blueberry Cheesecake",price:180000,flavor:"keju",img:"https://picsum.photos/seed/cheese/600/450",desc:"Cheesecake creamy dengan saus blueberry segar."},
+      {id:5,name:"Dark Choco Fudge",price:175000,flavor:"cokelat",img:"https://picsum.photos/seed/fudge/600/450",desc:"Fudge cokelat pekat, moist, topping glaze berkilau."},
+      {id:6,name:"Snowy Cupcakes (6)",price:95000,flavor:"vanila",img:"https://picsum.photos/seed/cupcake/600/450",desc:"Cupcake vanila dengan buttercream swirl biru."},
+      {id:7,name:"Cheese Croissant (4)",price:65000,flavor:"keju",img:"https://picsum.photos/seed/croissant/600/450",desc:"Croissant berlapis dengan isian keju gurih."},
+      {id:8,name:"Berry Roll",price:120000,flavor:"stroberi",img:"https://picsum.photos/seed/roll/600/450",desc:"Bolu gulung krim, saus berry manis-asam."}
+    ];
+
+    const grid = document.getElementById('productGrid');
+    const chips = [...document.querySelectorAll('.chip')];
+    const cart = new Map();
+
+    function currency(n){
+      return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
+    }
+
+    function render(filter='all'){
+      grid.innerHTML = '';
+      const list = products.filter(p => filter==='all' ? true : p.flavor===filter);
+      list.forEach(p => {
+        const el = document.createElement('article');
+        el.className = 'prod';
+        el.setAttribute('data-id', p.id);
+        el.setAttribute('data-flavor', p.flavor);
+        el.innerHTML = `
+          <div class="thumb">
+            <span class="sprinkles"></span>
+            <img src="${p.img}" alt="${p.name}" loading="lazy"/>
+          </div>
+          <h4>${p.name}</h4>
+          <p class="price">${currency(p.price)}</p>
+          <div class="actions">
+            <button class="btn" aria-label="Lihat ${p.name}" data-action="view">Lihat</button>
+            <button class="btn primary" aria-label="Tambah ${p.name}" data-action="add">Tambah</button>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+    }
+
+    // Filter interaksi
+    chips.forEach(ch => ch.addEventListener('click', () => {
+      chips.forEach(c => c.classList.remove('active')); ch.classList.add('active');
+      render(ch.dataset.filter);
+    }));
+
+    // Delegasi klik produk
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const card = e.target.closest('.prod');
+      const id = Number(card.dataset.id);
+      const p = products.find(x => x.id===id);
+      if(btn.dataset.action==='add'){ addToCart(p); }
+      if(btn.dataset.action==='view'){ openQuickView(p); }
+    });
+
+    // Quick View Modal
+    const qv = document.getElementById('quickView');
+    function openQuickView(p){
+      document.getElementById('qvImg').src = p.img;
+      document.getElementById('qvTitle').textContent = p.name;
+      document.getElementById('qvDesc').textContent = p.desc;
+      document.getElementById('qvPrice').textContent = currency(p.price);
+      document.getElementById('qvAdd').onclick = () => { addToCart(p); qv.close(); };
+      qv.showModal();
+    }
+
+    // Keranjang sederhana
+    const cartCount = document.getElementById('cartCount');
+    function addToCart(p){
+      cart.set(p.id, (cart.get(p.id) || 0) + 1);
+      cartCount.textContent = [...cart.values()].reduce((a,b)=>a+b,0);
+      toast(`${p.name} ditambahkan ke keranjang`);
+    }
+
+    // Promo action
+    function openPromo(){ toast('Kode promo BLUECAKE15 disalin ke clipboard'); navigator.clipboard.writeText('BLUECAKE15'); }
+
+    // Form kontak
+    const form = document.getElementById('contactForm');
+    const msg = document.getElementById('formMsg');
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      if(!data.nama || !data.wa || !data.pesan){ msg.textContent = 'Lengkapi semua data ya.'; return; }
+      msg.textContent = 'Terima kasih! Kami akan menghubungi via WhatsApp segera.';
+      form.reset();
+    });
+
+    // Tahun dinamis
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Toast mini
+    const toastBox = document.createElement('div');
+    toastBox.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:grid;gap:8px;z-index:9999';
+    document.body.appendChild(toastBox);
+    function toast(text){
+      const t = document.createElement('div');
+      t.textContent = text;
+      t.style.cssText = `background:var(--ink);color:#fff;padding:10px 14px;border-radius:999px;box-shadow:${getComputedStyle(document.documentElement).getPropertyValue('--shadow')};opacity:0;transform:translateY(10px);transition:.25s`;
+      toastBox.appendChild(t);
+      requestAnimationFrame(()=>{t.style.opacity=1;t.style.transform='translateY(0)'});
+      setTimeout(()=>{t.style.opacity=0;t.style.transform='translateY(10px)'; setTimeout(()=>t.remove(),250)},1800);
+    }
+
+    // Inisialisasi
+    render();
+  </script>
+</body>
+</html>
