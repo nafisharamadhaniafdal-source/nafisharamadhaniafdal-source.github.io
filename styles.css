@@ -1,0 +1,641 @@
+# Create a modern e-commerce website template for "Uda Parfum & Cosmetic"
+# Package it as a ZIP the user can download and upload to GitHub Pages.
+
+import os, json, zipfile, io, math, wave, struct
+
+base_dir = "/mnt/data/uda-parfum-site"
+assets_dir = os.path.join(base_dir, "assets")
+os.makedirs(assets_dir, exist_ok=True)
+
+# 1) Generate a lightweight, royalty-free ambient loop (sine pad) as WAV (about 12 seconds, mono)
+sample_rate = 44100
+duration_sec = 12
+frequency_a = 261.63  # C4
+frequency_b = 329.63  # E4
+frequency_c = 392.00  # G4
+volume = 0.2
+
+num_samples = sample_rate * duration_sec
+wav_path = os.path.join(assets_dir, "bg-music.wav")
+with wave.open(wav_path, "w") as wav_file:
+    wav_file.setnchannels(1)      # mono
+    wav_file.setsampwidth(2)      # 16-bit samples
+    wav_file.setframerate(sample_rate)
+    for i in range(num_samples):
+        t = i / sample_rate
+        # soft attack & release envelope
+        attack = 1.0 if t > 1.0 else t / 1.0
+        release = 1.0 if t < (duration_sec - 1.0) else max(0.0, (duration_sec - t) / 1.0)
+        env = min(attack, release)
+        # gentle vibrato on each tone
+        vib = 0.2 * math.sin(2 * math.pi * 0.3 * t)
+        s = (
+            math.sin(2 * math.pi * (frequency_a + vib) * t) +
+            math.sin(2 * math.pi * (frequency_b - vib) * t) +
+            math.sin(2 * math.pi * (frequency_c + vib) * t)
+        ) / 3.0
+        sample = int(volume * env * s * 32767.0)
+        wav_file.writeframes(struct.pack('<h', sample))
+
+# 2) Create a simple brand logo SVG
+logo_svg = '''<svg xmlns="http://www.w3.org/2000/svg" width="140" height="40" viewBox="0 0 280 80">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7dd3fc"/>
+      <stop offset="1" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+  <rect rx="16" ry="16" width="280" height="80" fill="url(#g)"/>
+  <g transform="translate(20,50)" fill="#fff" font-family="Arial, Helvetica, sans-serif">
+    <text font-size="20" font-weight="700">Uda Parfum &amp; Cosmetic</text>
+  </g>
+</svg>'''
+with open(os.path.join(assets_dir, "logo.svg"), "w", encoding="utf-8") as f:
+    f.write(logo_svg)
+
+# 3) HTML content
+index_html = """<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Uda Parfum & Cosmetic — Toko Parfum & Kosmetik Lengkap</title>
+  <meta name="description" content="Uda Parfum & Cosmetic — toko parfum dan kosmetik paling komplet. Warna biru langit & putih, animasi halus, slider foto, keranjang & checkout.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Background audio (muted by default to allow autoplay). User can unmute via the Music button. -->
+  <audio id="bg-audio" src="assets/bg-music.wav" loop autoplay muted></audio>
+
+  <header class="site-header">
+    <div class="container nav">
+      <div class="brand">
+        <img src="assets/logo.svg" alt="Uda Parfum & Cosmetic" />
+        <div class="brand-text">
+          <strong>Uda Parfum & Cosmetic</strong>
+          <span class="owner">by Nafisha Ramadhani</span>
+        </div>
+      </div>
+      <nav class="menu">
+        <a href="#koleksi">Koleksi</a>
+        <a href="#tentang">Tentang</a>
+        <a href="#kontak">Kontak</a>
+        <button id="musicToggle" class="btn ghost" aria-label="Toggle music">♪ Music</button>
+        <button id="cartButton" class="btn cart-btn" aria-label="Buka keranjang">
+          <span class="cart-count" id="cartCount">0</span>
+          Keranjang
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <h1 data-animate="fade-up">
+          Toko Parfum & Kosmetik Paling Keren ✨
+        </h1>
+        <p data-animate="fade-up" data-delay="100">
+          Hadirkan pesona terbaikmu dengan koleksi parfum mewah dan kosmetik premium.
+          Pengiriman cepat, kemasan aman, dan layanan ramah.
+        </p>
+        <div class="hero-cta" data-animate="fade-up" data-delay="200">
+          <a href="#koleksi" class="btn primary">Belanja Sekarang</a>
+          <a href="#tentang" class="btn ghost">Jelajahi</a>
+        </div>
+      </div>
+      <div class="slider" data-animate="float">
+        <div class="slides" id="slides">
+          <img src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1600&auto=format&fit=crop" alt="Parfum elegan">
+          <img src="https://images.unsplash.com/photo-1612815154858-60aa4c59eaa0?q=80&w=1600&auto=format&fit=crop" alt="Kosmetik premium">
+          <img src="https://images.unsplash.com/photo-1585386959984-a41552231677?q=80&w=1600&auto=format&fit=crop" alt="Counter kosmetik modern">
+        </div>
+        <button class="slider-nav prev" id="prevSlide" aria-label="Sebelumnya">‹</button>
+        <button class="slider-nav next" id="nextSlide" aria-label="Berikutnya">›</button>
+        <div class="dots" id="sliderDots" aria-label="Navigasi slider"></div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section id="koleksi" class="container section">
+      <h2 data-animate="fade-up">Koleksi Favorit</h2>
+      <p class="sub" data-animate="fade-up" data-delay="100">
+        Pilihan parfum dan kosmetik terbaik, dikurasi langsung oleh <strong>Nafisha Ramadhani</strong>.
+      </p>
+
+      <div class="grid" id="productGrid">
+        <!-- Produk di-inject via JS -->
+      </div>
+    </section>
+
+    <section id="tentang" class="section alt">
+      <div class="container about">
+        <div class="about-copy" data-animate="fade-up">
+          <h2>Cerita Kami</h2>
+          <p>
+            Uda Parfum & Cosmetic lahir dari kecintaan pada aroma memikat dan perawatan diri.
+            Misi kami sederhana: menghadirkan pengalaman belanja yang menawan, mudah, dan tepercaya.
+          </p>
+          <ul class="bullets">
+            <li>Produk 100% orisinal</li>
+            <li>Varian lengkap: parfum, makeup, skincare</li>
+            <li>Support ramah & responsif</li>
+          </ul>
+        </div>
+        <div class="about-card" data-animate="float">
+          <h3>Owner</h3>
+          <p><strong>Nafisha Ramadhani</strong></p>
+          <p>Membangun brand kecantikan yang modern, inklusif, dan menyenangkan.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="kontak" class="container section">
+      <h2 data-animate="fade-up">Kontak & Lokasi</h2>
+      <div class="contact" data-animate="fade-up" data-delay="100">
+        <div>
+          <p>Email: <a href="mailto:cs@udaparfum.com">cs@udaparfum.com</a></p>
+          <p>Instagram: <a href="https://instagram.com" target="_blank" rel="noreferrer">/@udaparfumcosmetic</a></p>
+        </div>
+        <form id="newsletterForm" class="newsletter" onsubmit="return false;">
+          <label for="email">Berlangganan promo:</label>
+          <input type="email" id="email" placeholder="Email kamu" required />
+          <button class="btn primary" id="subscribeBtn">Daftar</button>
+          <span id="subscribeMsg" class="msg"></span>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Cart Drawer -->
+  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
+    <div class="cart-header">
+      <h3>Keranjang</h3>
+      <button class="icon-btn" id="closeCart" aria-label="Tutup keranjang">✕</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total">
+        <span>Total</span>
+        <strong id="cartTotal">Rp0</strong>
+      </div>
+      <button class="btn ghost" id="clearCart">Kosongkan</button>
+      <button class="btn primary" id="checkoutBtn">Checkout</button>
+    </div>
+  </aside>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Checkout Modal -->
+  <dialog id="checkoutModal" class="checkout-modal">
+    <form method="dialog" id="checkoutForm">
+      <h3>Checkout</h3>
+      <div class="form-grid">
+        <label>Nama Penerima
+          <input required id="coName" placeholder="Nama lengkap" />
+        </label>
+        <label>No. HP / WA
+          <input required id="coPhone" placeholder="08xxxxxxxxxx" />
+        </label>
+        <label>Alamat
+          <textarea required id="coAddress" placeholder="Jalan, No, Kota, Kode Pos"></textarea>
+        </label>
+        <label>Metode Pembayaran
+          <select id="coPayment" required>
+            <option value="">Pilih</option>
+            <option>Transfer Bank</option>
+            <option>QRIS</option>
+            <option>COD</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button value="cancel" class="btn ghost">Batal</button>
+        <button id="payNow" class="btn primary">Bayar Sekarang</button>
+      </div>
+      <p class="tiny">*Simulasi checkout (tanpa pembayaran nyata).</p>
+    </form>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="container">
+      © <span id="year"></span> Uda Parfum & Cosmetic — Nafisha Ramadhani. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
+"""
+
+with open(os.path.join(base_dir, "index.html"), "w", encoding="utf-8") as f:
+    f.write(index_html)
+
+# 4) CSS content
+styles_css = """*{box-sizing:border-box}
+:root{
+  --sky:#e0f2fe;
+  --sky-600:#38bdf8;
+  --sky-500:#0ea5e9;
+  --sky-300:#7dd3fc;
+  --ink:#0f172a;
+  --muted:#475569;
+  --white:#ffffff;
+  --card:#f8fafc;
+  --shadow:0 10px 30px rgba(2,132,199,0.15);
+  --radius:20px;
+}
+html,body{margin:0;padding:0;font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fff 0%, var(--sky) 100%) fixed}
+img{max-width:100%;display:block}
+.container{width:min(1200px,92%);margin-inline:auto}
+.btn{border:none;border-radius:999px;padding:.85rem 1.15rem;font-weight:600;cursor:pointer;box-shadow:var(--shadow);transition:.25s transform, .25s box-shadow;display:inline-flex;gap:.5rem;align-items:center}
+.btn.primary{background:linear-gradient(135deg,var(--sky-600),var(--sky-500));color:var(--white)}
+.btn.ghost{background:#fff;color:var(--sky-500);border:2px solid var(--sky-300)}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.icon-btn{background:#fff;border:none;border-radius:12px;padding:.4rem .6rem;cursor:pointer;box-shadow:var(--shadow)}
+
+.site-header{position:sticky;top:0;background:rgba(255,255,255,.8);backdrop-filter:blur(10px);z-index:50;border-bottom:1px solid rgba(2,132,199,.08)}
+.site-header .nav{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0}
+.brand{display:flex;align-items:center;gap:.8rem}
+.brand img{width:120px;height:auto}
+.brand-text{display:flex;flex-direction:column;line-height:1}
+.brand-text strong{font-size:1rem}
+.brand-text .owner{font-size:.8rem;color:var(--muted)}
+.menu{display:flex;gap:1rem;align-items:center}
+.menu a{color:var(--ink);text-decoration:none;font-weight:600}
+.cart-btn{position:relative}
+.cart-count{position:absolute;top:-10px;right:-10px;background:var(--sky-500);color:#fff;border-radius:999px;padding:.15rem .4rem;font-size:.7rem;min-width:1.2rem;text-align:center}
+
+.hero{padding:72px 0 40px;background:radial-gradient(60% 60% at 80% -10%, rgba(56,189,248,.25) 0%, rgba(56,189,248,0) 60%)}
+.hero-inner{display:grid;grid-template-columns:1.05fr .95fr;gap:2rem;align-items:center}
+.hero h1{font-size:clamp(2rem,3vw,3rem);margin:0 0 .6rem}
+.hero p{color:var(--muted);max-width:54ch;margin:0 0 1rem}
+.hero-cta{display:flex;gap:.8rem}
+
+.slider{position:relative;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+.slides{display:flex;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.slides img{width:100%;height:420px;object-fit:cover;flex-shrink:0}
+.slider-nav{position:absolute;top:50%;transform:translateY(-50%);border:none;background:rgba(255,255,255,.7);backdrop-filter:blur(8px);width:44px;height:44px;border-radius:50%;cursor:pointer;box-shadow:var(--shadow);font-size:24px}
+.slider-nav.prev{left:10px}
+.slider-nav.next{right:10px}
+.dots{position:absolute;left:0;right:0;bottom:12px;display:flex;gap:.5rem;justify-content:center}
+.dots button{width:10px;height:10px;border-radius:999px;border:none;background:rgba(255,255,255,.8);cursor:pointer}
+.dots button.active{width:30px;background:var(--sky-500)}
+
+.section{padding:64px 0}
+.section.alt{background:linear-gradient(180deg,rgba(2,132,199,.06), rgba(2,132,199,0) 100%)}
+.sub{color:var(--muted);margin-top:-6px}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1.2rem}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.card .media{position:relative;height:200px;overflow:hidden}
+.card .media img{width:100%;height:100%;object-fit:cover;transform:scale(1.02);transition:transform .6s}
+.card:hover .media img{transform:scale(1.08)}
+.card .content{padding:1rem;display:flex;flex-direction:column;gap:.4rem}
+.price{display:flex;gap:.5rem;align-items:baseline}
+.price .now{font-weight:700}
+.price .was{color:var(--muted);text-decoration:line-through;font-size:.9rem}
+.actions{margin-top:auto;display:flex;gap:.5rem}
+.badge{position:absolute;top:10px;left:10px;background:rgba(14,165,233,.95);color:#fff;padding:.25rem .5rem;border-radius:999px;font-size:.75rem;font-weight:600}
+
+.about{display:grid;grid-template-columns:1.2fr .8fr;gap:2rem;align-items:stretch}
+.about-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:1.2rem}
+
+.contact{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between}
+.newsletter{display:flex;gap:.5rem;align-items:center}
+.newsletter input, .newsletter button{height:44px}
+.newsletter input{padding:.6rem .8rem;border:2px solid var(--sky-300);border-radius:10px;outline:none}
+.msg{font-size:.9rem;margin-left:.5rem}
+
+.site-footer{padding:28px 0;color:var(--muted)}
+
+/* Cart Drawer */
+.cart-drawer{position:fixed;top:0;right:-420px;width:400px;max-width:90vw;height:100vh;background:#fff;box-shadow:-10px 0 30px rgba(2,132,199,.15);transition:right .35s ease;z-index:60;display:flex;flex-direction:column;border-top-left-radius:16px;border-bottom-left-radius:16px}
+.cart-drawer.open{right:0}
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.25);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:55}
+.overlay.show{opacity:1;pointer-events:auto}
+.cart-header{display:flex;align-items:center;justify-content:space-between;padding:1rem;border-bottom:1px solid rgba(148,163,184,.3)}
+.cart-items{flex:1;overflow:auto;padding:1rem;display:flex;flex-direction:column;gap:.8rem}
+.cart-item{display:grid;grid-template-columns:auto 1fr auto;gap:.8rem;align-items:center;background:#f1f5f9;border-radius:12px;padding:.5rem}
+.cart-item img{width:64px;height:64px;object-fit:cover;border-radius:10px}
+.cart-item .title{font-weight:600}
+.cart-item .qty{display:flex;align-items:center;gap:.4rem}
+.cart-item .qty button{width:28px;height:28px;border-radius:8px;border:none;background:#fff;box-shadow:var(--shadow);cursor:pointer}
+.cart-footer{border-top:1px solid rgba(148,163,184,.3);padding:1rem;display:grid;gap:.6rem}
+.cart-total{display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem}
+
+/* Checkout Modal */
+.checkout-modal{border:none;border-radius:16px;box-shadow:var(--shadow);padding:0}
+.checkout-modal form{padding:1rem;width:min(560px,92vw)}
+.checkout-modal::backdrop{background:rgba(15,23,42,.35)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.8rem 0}
+.form-grid textarea{min-height:100px}
+.form-grid label{display:flex;flex-direction:column;gap:.35rem;font-weight:600;color:var(--muted)}
+.form-grid input, .form-grid textarea, .form-grid select{padding:.7rem .8rem;border:2px solid var(--sky-300);border-radius:10px;outline:none}
+.modal-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:.6rem}
+.tiny{font-size:.8rem;color:var(--muted)}
+
+/* Animations */
+[data-animate]{opacity:0;transform:translateY(10px);transition:opacity .6s ease, transform .6s ease}
+[data-animate].in{opacity:1;transform:translateY(0)}
+[data-animate="float"]{animation:float 6s ease-in-out infinite;opacity:1;transform:none}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+@media (max-width: 900px){
+  .hero-inner{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width: 560px){
+  .grid{grid-template-columns:1fr}
+  .slides img{height:300px}
+}
+"""
+
+with open(os.path.join(base_dir, "styles.css"), "w", encoding="utf-8") as f:
+    f.write(styles_css)
+
+# 5) JavaScript content
+app_js = r"""// Uda Parfum & Cosmetic - Frontend Store
+const state = {
+  products: [
+    { id: 'p1', title: 'Aura Luxe EDP 50ml', price: 379000, was: 459000, img: 'https://images.unsplash.com/photo-1585386959984-a41552231677?q=80&w=1200&auto=format&fit=crop', tag: 'Best Seller' },
+    { id: 'p2', title: 'Velvet Kiss Lip Cream', price: 99000, was: 139000, img: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa0?q=80&w=1200&auto=format&fit=crop', tag: 'Baru' },
+    { id: 'p3', title: 'HydraGlow Serum 30ml', price: 149000, was: 189000, img: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1200&auto=format&fit=crop', tag: 'Promo' },
+    { id: 'p4', title: 'Silk Mist Body Spray', price: 79000, was: 99000, img: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1200&auto=format&fit=crop', tag: 'Favorit' },
+    { id: 'p5', title: 'Prime Matte Cushion', price: 179000, was: 219000, img: 'https://images.unsplash.com/photo-1582092723813-2a6c3790df52?q=80&w=1200&auto=format&fit=crop', tag: 'Best Seller' },
+    { id: 'p6', title: 'Rose Petal Toner', price: 89000, was: 109000, img: 'https://images.unsplash.com/photo-1629198735661-a3c64fd29379?q=80&w=1200&auto=format&fit=crop', tag: 'Segar' },
+    { id: 'p7', title: 'Midnight Oud EDP 100ml', price: 499000, was: 599000, img: 'https://images.unsplash.com/photo-1563170351-be82bc888aa4?q=80&w=1200&auto=format&fit=crop', tag: 'Mewah' },
+    { id: 'p8', title: 'Daily Sunscreen SPF 50+', price: 79000, was: 99000, img: 'https://images.unsplash.com/photo-1629198749762-1fb3dfcc1a64?q=80&w=1200&auto=format&fit=crop', tag: 'Wajib' }
+  ],
+  cart: JSON.parse(localStorage.getItem('uda_cart') || '[]'),
+  slideIndex: 0
+};
+
+// Utilities
+const fmt = n => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+const el = sel => document.querySelector(sel);
+const els = sel => document.querySelectorAll(sel);
+
+function saveCart() {
+  localStorage.setItem('uda_cart', JSON.stringify(state.cart));
+  renderCart();
+}
+
+function addToCart(productId) {
+  const item = state.cart.find(i => i.id === productId);
+  if (item) item.qty += 1;
+  else state.cart.push({ id: productId, qty: 1 });
+  saveCart();
+}
+
+function setQty(productId, qty) {
+  const item = state.cart.find(i => i.id === productId);
+  if (!item) return;
+  item.qty = Math.max(1, qty);
+  saveCart();
+}
+
+function removeItem(productId) {
+  state.cart = state.cart.filter(i => i.id !== productId);
+  saveCart();
+}
+
+function cartTotal() {
+  return state.cart.reduce((sum, it) => {
+    const p = state.products.find(p => p.id === it.id);
+    return sum + (p ? p.price * it.qty : 0);
+  }, 0);
+}
+
+function renderProducts() {
+  const grid = el('#productGrid');
+  grid.innerHTML = state.products.map(p => `
+    <article class="card" data-animate="fade-up">
+      <div class="media">
+        <img src="${p.img}" alt="${p.title}" loading="lazy">
+        <span class="badge">${p.tag}</span>
+      </div>
+      <div class="content">
+        <h3>${p.title}</h3>
+        <div class="price">
+          <span class="now">${fmt(p.price)}</span>
+          <span class="was">${fmt(p.was)}</span>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" onclick="addToCart('${p.id}')">Tambah ke Keranjang</button>
+          <button class="btn primary" onclick="buyNow('${p.id}')">Beli Sekarang</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderCart() {
+  // Update count
+  const count = state.cart.reduce((n, it) => n + it.qty, 0);
+  el('#cartCount').textContent = count;
+
+  // Items
+  const wrap = el('#cartItems');
+  if (!state.cart.length) {
+    wrap.innerHTML = `<p>Keranjang masih kosong. Yuk belanja dulu ✨</p>`;
+  } else {
+    wrap.innerHTML = state.cart.map(it => {
+      const p = state.products.find(p => p.id === it.id);
+      if (!p) return '';
+      return `
+        <div class="cart-item">
+          <img src="${p.img}" alt="${p.title}">
+          <div>
+            <div class="title">${p.title}</div>
+            <div class="muted">${fmt(p.price)} • ${fmt(p.price * it.qty)}</div>
+            <div class="qty">
+              <button onclick="decrement('${p.id}')">−</button>
+              <span>${it.qty}</span>
+              <button onclick="increment('${p.id}')">+</button>
+            </div>
+          </div>
+          <button class="icon-btn" onclick="removeItem('${p.id}')">✕</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Total
+  el('#cartTotal').textContent = fmt(cartTotal());
+}
+
+function increment(id){ const it = state.cart.find(i => i.id === id); if (it){ it.qty++; saveCart(); } }
+function decrement(id){ const it = state.cart.find(i => i.id === id); if (it){ it.qty = Math.max(1, it.qty - 1); saveCart(); } }
+
+// Drawer
+const drawer = el('#cartDrawer');
+const overlay = el('#overlay');
+function openCart(){
+  drawer.classList.add('open');
+  overlay.classList.add('show');
+  drawer.setAttribute('aria-hidden', 'false');
+}
+function closeCart(){
+  drawer.classList.remove('open');
+  overlay.classList.remove('show');
+  drawer.setAttribute('aria-hidden', 'true');
+}
+
+// Slider
+function initSlider(){
+  const slides = el('#slides');
+  const images = slides.querySelectorAll('img');
+  const dots = el('#sliderDots');
+
+  function gotoSlide(i){
+    state.slideIndex = (i + images.length) % images.length;
+    slides.style.transform = `translateX(-${state.slideIndex * 100}%)`;
+    dots.querySelectorAll('button').forEach((b,bi)=> b.classList.toggle('active', bi===state.slideIndex));
+  }
+
+  dots.innerHTML = Array.from(images).map((_,i)=>`<button aria-label="Ke slide ${i+1}" ${i===0?'class="active"':''}></button>`).join('');
+  dots.querySelectorAll('button').forEach((b,i)=> b.addEventListener('click',()=>gotoSlide(i)));
+  el('#prevSlide').addEventListener('click',()=>gotoSlide(state.slideIndex-1));
+  el('#nextSlide').addEventListener('click',()=>gotoSlide(state.slideIndex+1));
+
+  setInterval(()=>gotoSlide(state.slideIndex+1), 5000);
+}
+
+// Checkout
+function buyNow(id){
+  addToCart(id);
+  openCart();
+}
+
+function setupCheckout(){
+  el('#checkoutBtn').addEventListener('click', () => {
+    if (!state.cart.length) {
+      alert('Keranjang masih kosong.');
+      return;
+    }
+    el('#checkoutModal').showModal();
+  });
+
+  el('#payNow').addEventListener('click', (e) => {
+    e.preventDefault();
+    const name = el('#coName').value.trim();
+    const phone = el('#coPhone').value.trim();
+    const address = el('#coAddress').value.trim();
+    const payment = el('#coPayment').value;
+
+    if (!name || !phone || !address || !payment) return;
+
+    const order = {
+      name, phone, address, payment,
+      items: state.cart.map(it => {
+        const p = state.products.find(x => x.id === it.id);
+        return { id: it.id, title: p?.title, qty: it.qty, price: p?.price, subtotal: (p?.price || 0) * it.qty };
+      }),
+      total: cartTotal(),
+      createdAt: new Date().toISOString()
+    };
+
+    // Save a "receipt" JSON to download
+    const blob = new Blob([JSON.stringify(order, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `order-uda-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    alert('Terima kasih! Pesanan kamu tersimpan sebagai file JSON. Kami akan menghubungi via WhatsApp untuk konfirmasi.');
+    state.cart = [];
+    saveCart();
+    el('#checkoutModal').close();
+    closeCart();
+  });
+}
+
+// Newsletter
+function setupNewsletter(){
+  el('#subscribeBtn').addEventListener('click', () => {
+    const email = el('#email').value.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      el('#subscribeMsg').textContent = 'Email tidak valid.';
+      return;
+    }
+    el('#subscribeMsg').textContent = 'Terima kasih! Kamu sudah terdaftar.';
+    setTimeout(()=> el('#subscribeMsg').textContent = '', 4000);
+    el('#email').value='';
+  });
+}
+
+// Music toggle
+function setupMusic(){
+  const audio = el('#bg-audio');
+  const btn = el('#musicToggle');
+  btn.addEventListener('click', async () => {
+    try{
+      if(audio.muted){
+        audio.muted = false;
+        await audio.play();
+        btn.textContent = '❚❚ Pause Music';
+      } else if (!audio.paused){
+        audio.pause();
+        btn.textContent = '► Play Music';
+      } else {
+        await audio.play();
+        btn.textContent = '❚❚ Pause Music';
+      }
+    }catch(err){
+      console.log(err);
+      alert('Browser memblokir autoplay. Tekan tombol lagi untuk memulai musik.');
+    }
+  });
+}
+
+// Animations on scroll
+function setupAnimations(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) e.target.classList.add('in');
+    });
+  }, { threshold: .15 });
+  document.querySelectorAll('[data-animate]').forEach(el=> obs.observe(el));
+}
+
+function setupEvents(){
+  el('#cartButton').addEventListener('click', openCart);
+  el('#closeCart').addEventListener('click', closeCart);
+  el('#clearCart').addEventListener('click', () => { state.cart = []; saveCart(); });
+  overlay.addEventListener('click', closeCart);
+}
+
+// Init
+window.addEventListener('DOMContentLoaded', () => {
+  renderProducts();
+  renderCart();
+  setupEvents();
+  setupCheckout();
+  setupNewsletter();
+  setupMusic();
+  setupAnimations();
+  initSlider();
+  document.getElementById('year').textContent = new Date().getFullYear();
+});
+"""
+
+with open(os.path.join(base_dir, "app.js"), "w", encoding="utf-8") as f:
+    f.write(app_js)
+
+# 6) Zip the project
+zip_path = "/mnt/data/uda-parfum-and-cosmetic.zip"
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    for root, dirs, files in os.walk(base_dir):
+        for file in files:
+            full_path = os.path.join(root, file)
+            rel_path = os.path.relpath(full_path, base_dir)
+            z.write(full_path, arcname=rel_path)
+
+zip_path
